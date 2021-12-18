@@ -1,0 +1,71 @@
+This folder includes relevant codes to test 1-day, 1-scene neural network retrieval over China in Li et al., JRS, 2021.
+
+1) The main scripts include:
+
+1. TROPOMI.py: I/O interfaces of various satellite and complementary input data for
+the retrieval.
+
+2. MLPros.py: Various modules for AI processing and implementation used in
+ANNNO2.py
+
+3. ANNNO2.py: Main program to do the retrieval for a single day and specified
+region
+
+Main inputs:
+DataDir: folder of all necessary inputs (downloadable for September 2, 2019
+over China at Mega Drive: )
+
+parser params:
+--year --month --day: YYYYMMDD to identifile files to accumulate
+--Region: string identifier to locate min/max latitudes and longitudes of the
+retrieval. For the example inputs, a Region name of "CN" is pre-defined. See and modify example Lines 40-70 in the code to define your own
+region
+
+The output files of NN retrievals are at $DataDir/ANNs/$Region.
+
+4. InterpNO2.py: Interpolate the retrievals from separate NN models trained
+using SRFs of TROPOMI's 0th, 50th, 100th, .... 400th,
+and 449th detection rows to the rows not covered.
+
+The output files of NN retrievals are at $DataDir/ANNs/$Region/Interp.
+
+parser params:
+--Region: same meaning as in ANNNO2.py
+--buffer: the buffer range (in DU) for merging retrievals from high- and
+low-NO2 NN models. See Equation 4 in Li et al., JRS, 2021.
+
+2) How to run the program:
+
+1. Install all required packaged in requirements.txt (Note: you need to
+install hdf4 libraries first before pyhdf could be installed)
+
+2. Change the directory location of "DataDir" in bash script RunANN.sh
+(locations all the inputs are downloaded to).
+
+3. Run the bash script. The retrievals and row-interpolation will be
+processed, provided that all the input data are available.
+
+3) Output file
+
+NetCDF files in the $DataDir/ANNs/$Region/Interp/ folder. Most of the variable
+names are self-explainary. Important variables are listed below:
+
+Cloud_Fraction_Geo: geometric cloud fraction
+Cloud_Fraction_Rad: cloud radiance fraction, only used to merge cloudy and
+non-cloudy NO2 columns (Equation 5)
+
+NO2_std_TOTCol: total NO2 column from level2 TROPOMI
+NO2_std_TROPCol: tropospheric NO2 column from level2 TROPOMI
+
+NO2_TOTCol: merged total NO2 column from NN
+
+NO2_TOTCol_clear: merged total NO2 column from NN under clear assumptions
+NO2_TOTCol_clear_High: total NO2 column from the high-NO2 (>0.4 DU) NN model under clear assuptions
+NO2_TOTCol_clear_Low: total NO2 column from the low-NO2 (<0.4 DU) NN model under clear assuptions
+
+NO2_TOTCol_cloudy: merged total NO2 column from NN under fully cloudy assumptions
+NO2_TOTCol_cloudy_High: total NO2 column from the high-NO2 (>0.4 DU) NN model under fully cloudy assuptions
+NO2_TOTCol_clouy_Low: total NO2 column from the low-NO2 (<0.4 DU) NN model under fully cloudy assuptions
+
+
+
